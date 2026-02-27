@@ -1,0 +1,17 @@
+# Segurança e Variáveis de Ambiente
+.env
+
+# Backend (Python)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Frontend (Node/React)
+node_modules/
+dist/
+build/
+
+# SO (Windows/Mac)
+.DS_Store
+Thumbs.db
