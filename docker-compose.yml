@@ -7,3 +7,5 @@ services:
       - ./backend:/app
     environment:
       - ENV=development
+    env_file:
+      - .env
