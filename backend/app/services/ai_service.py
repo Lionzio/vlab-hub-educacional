@@ -1,15 +1,17 @@
 import json
+import logging
 from google import genai
-from google.genai import types
-from app.core.config import settings
+from app.core import settings
 
-# O novo SDK inicializa o cliente de forma mais limpa
+# Inicializa o cliente do novo SDK do Google Gemini
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
+logger = logging.getLogger("VoxarHub")
 
 def generate_smart_assist(title: str, resource_type: str) -> dict:
-    """Consulta o Gemini usando o novo SDK oficial 'google-genai'."""
-    
-    # Prompt Engineering
+    """
+    Consulta o Google Gemini usando o SDK oficial (google-genai) 
+    para gerar metadados educacionais (descrição e tags).
+    """
     prompt = f"""
     Atue como um Assistente Pedagógico especialista em materiais didáticos. 
     Analise o seguinte recurso e gere metadados para alunos:
@@ -30,15 +32,15 @@ def generate_smart_assist(title: str, resource_type: str) -> dict:
     """
     
     try:
-        # A nova sintaxe usa client.models.generate_content
+        # Apontando para o modelo atualizado (2.0-flash) suportado pelo novo SDK
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt,
         )
         
         text = response.text
         
-        # Limpeza do Markdown JSON
+        # Limpeza preventiva caso a IA retorne formatação Markdown (```json ... ```)
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
@@ -47,7 +49,8 @@ def generate_smart_assist(title: str, resource_type: str) -> dict:
         return json.loads(text.strip())
         
     except Exception as e:
-        print(f"Erro na geração de IA: {e}") # Usando print temporário para capturar erros detalhados no console local
+        logger.error(f"Erro na geração de IA: {e}")
+        # Fallback seguro: garante que a aplicação não quebre e o usuário consiga salvar
         return {
             "description": f"Este recurso de {resource_type} aborda o tema '{title}' de forma didática.",
             "tags": f"{resource_type}, educação, estudo"
