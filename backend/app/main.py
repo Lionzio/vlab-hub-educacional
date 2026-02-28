@@ -13,7 +13,7 @@ material_model.Base.metadata.create_all(bind=engine)
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
-    title="Hub Inteligente de Recursos Educacionais",
+    title="V-Lab Hub Educacional",
     description="API arquitetada com Clean Architecture e integração com Gemini IA.",
     version="2.0.0", # Subimos a versão para marcar a refatoração!
 )

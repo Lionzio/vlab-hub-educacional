@@ -11,7 +11,7 @@ sqlalchemy = "*"
 pydantic = "*"
 pydantic-settings = "*"
 psycopg2-binary = "*"
-google-generativeai = "*"
+google-genai = "*"
 
 [dev-packages]
 black = "*"

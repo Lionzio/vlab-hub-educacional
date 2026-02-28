@@ -1,5 +1,5 @@
-🎓 Voxar Hub Educacional
-O Voxar Hub é uma plataforma inteligente para curadoria e gerenciamento de recursos didáticos. O grande diferencial do projeto é o Smart Assist, um assistente pedagógico baseado em Inteligência Artificial (Google Gemini) que automatiza a criação de descrições e a categorização de materiais, otimizando o tempo de educadores e alunos.
+🎓 V-Lab Hub Educacional
+O V-Lab Hub é uma plataforma inteligente para curadoria e gerenciamento de recursos didáticos. O grande diferencial do projeto é o Smart Assist, um assistente pedagógico baseado em Inteligência Artificial (Google Gemini) que automatiza a criação de descrições e a categorização de materiais, otimizando o tempo de educadores e alunos.
 
 🚀 Tecnologias utilizadas
 O projeto foi construído com uma stack moderna e escalável, focada em performance e tipagem estrita:
@@ -54,4 +54,4 @@ Latência em segundos, permitindo identificar gargalos de performance.
 
 
 👩‍💻 Autor
-Desenvolvido por Vinícius como parte do desafio técnico para a V-Labs.
+Desenvolvido por Vinícius como parte do desafio técnico para a V-Lab.

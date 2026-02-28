@@ -1,12 +1,12 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # O Pydantic automaticamente procurará essa variável nas variáveis de ambiente ou no arquivo .env
-    GEMINI_API_KEY: str
+    # Fornecemos um valor padrão 'dummy' para que o Pydantic não quebre durante a coleta de testes unitários.
+    # Em produção (Docker), o .env real sobrescreverá este valor automaticamente[cite: 35].
+    GEMINI_API_KEY: str = "chave_falsa_para_testes"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = 'utf-8'
+    # Sintaxe moderna do Pydantic V2 (Substitui a antiga 'class Config') 
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8', extra='ignore')
 
 # Instanciamos a configuração para usarmos em todo o projeto
 settings = Settings()
