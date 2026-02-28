@@ -16,6 +16,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
 def get_db():
     """Dependência para gerar e fechar a sessão do banco por cada requisição."""
     db = SessionLocal()

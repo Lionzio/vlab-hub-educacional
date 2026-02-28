@@ -2,9 +2,10 @@ from sqlalchemy.orm import Session
 from app.models.material import EducationalMaterialModel
 from app.schemas.material import MaterialCreate, MaterialUpdate
 
+
 class MaterialRepository:
     """Isola a lógica de acesso a dados (banco) do resto da aplicação."""
-    
+
     def __init__(self, db: Session):
         self.db = db
 
@@ -19,9 +20,15 @@ class MaterialRepository:
         return self.db.query(EducationalMaterialModel).offset(skip).limit(limit).all()
 
     def get_by_id(self, material_id: int) -> EducationalMaterialModel | None:
-        return self.db.query(EducationalMaterialModel).filter(EducationalMaterialModel.id == material_id).first()
+        return (
+            self.db.query(EducationalMaterialModel)
+            .filter(EducationalMaterialModel.id == material_id)
+            .first()
+        )
 
-    def update(self, db_material: EducationalMaterialModel, material_data: MaterialUpdate) -> EducationalMaterialModel:
+    def update(
+        self, db_material: EducationalMaterialModel, material_data: MaterialUpdate
+    ) -> EducationalMaterialModel:
         for key, value in material_data.model_dump(exclude_unset=True).items():
             setattr(db_material, key, value)
         self.db.commit()

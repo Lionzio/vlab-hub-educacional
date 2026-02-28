@@ -1,8 +1,10 @@
 from sqlalchemy import Column, Integer, String, Text
 from app.core.database import Base
 
+
 class EducationalMaterialModel(Base):
     """Modelo de dados ORM para a tabela de materiais didáticos."""
+
     __tablename__ = "materials"
 
     id = Column(Integer, primary_key=True, index=True)

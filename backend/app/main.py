@@ -22,11 +22,12 @@ app = FastAPI(
 app.include_router(material_router)
 app.include_router(ai_router)
 
+
 @app.get("/health", tags=["Observabilidade"])
 def health_check():
     """Endpoint de verificação de integridade do sistema."""
     return {
-        "status": "ok", 
-        "message": "API rodando com Clean Architecture!", 
-        "environment": "development"
+        "status": "ok",
+        "message": "API rodando com Clean Architecture!",
+        "environment": "development",
     }

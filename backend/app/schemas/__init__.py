@@ -2,6 +2,10 @@ from .material import MaterialBase, MaterialCreate, MaterialUpdate, MaterialResp
 from .ai import SmartAssistRequest, SmartAssistResponse
 
 __all__ = [
-    "MaterialBase", "MaterialCreate", "MaterialUpdate", "MaterialResponse",
-    "SmartAssistRequest", "SmartAssistResponse"
+    "MaterialBase",
+    "MaterialCreate",
+    "MaterialUpdate",
+    "MaterialResponse",
+    "SmartAssistRequest",
+    "SmartAssistResponse",
 ]
