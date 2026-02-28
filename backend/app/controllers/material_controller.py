@@ -2,24 +2,24 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.core.database import get_db
-from app.schemas import material as schemas
-from app.repositories.material_repository import MaterialRepository
+# Imports otimizados focados apenas nos contratos e abstrações necessárias
+from app.core import get_db
+from app.schemas import MaterialCreate, MaterialUpdate, MaterialResponse
+from app.repositories import MaterialRepository
 
-# Criamos um roteador específico para a entidade Material
 router = APIRouter(prefix="/materials", tags=["Materials"])
 
-@router.post("/", response_model=schemas.MaterialResponse, status_code=status.HTTP_201_CREATED)
-def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=MaterialResponse, status_code=status.HTTP_201_CREATED)
+def create_material(material: MaterialCreate, db: Session = Depends(get_db)):
     repo = MaterialRepository(db)
     return repo.create(material)
 
-@router.get("/", response_model=List[schemas.MaterialResponse])
+@router.get("/", response_model=List[MaterialResponse])
 def list_materials(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     repo = MaterialRepository(db)
     return repo.get_all(skip, limit)
 
-@router.get("/{material_id}", response_model=schemas.MaterialResponse)
+@router.get("/{material_id}", response_model=MaterialResponse)
 def get_material(material_id: int, db: Session = Depends(get_db)):
     repo = MaterialRepository(db)
     db_material = repo.get_by_id(material_id)
@@ -27,8 +27,8 @@ def get_material(material_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Material não encontrado.")
     return db_material
 
-@router.put("/{material_id}", response_model=schemas.MaterialResponse)
-def update_material(material_id: int, material: schemas.MaterialUpdate, db: Session = Depends(get_db)):
+@router.put("/{material_id}", response_model=MaterialResponse)
+def update_material(material_id: int, material: MaterialUpdate, db: Session = Depends(get_db)):
     repo = MaterialRepository(db)
     db_material = repo.get_by_id(material_id)
     if not db_material:

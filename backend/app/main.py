@@ -1,29 +1,32 @@
-from fastapi import FastAPI
 import logging
+from fastapi import FastAPI
 
-# Importações dos nossos módulos
-from app.core.database import engine
-from app.models import material as material_model
-from app.controllers import material_controller, ai_controller
+# Imports otimizados e limpos (Domain-Driven)
+from app.core import engine
+from app.models import EducationalMaterialModel
+from app.controllers import material_router, ai_router
 
-# Cria as tabelas no banco de dados
-material_model.Base.metadata.create_all(bind=engine)
+# Criação das tabelas no banco de dados
+EducationalMaterialModel.metadata.create_all(bind=engine)
 
-# Configuração global do Logger
+# Configuração global de observabilidade
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
     title="V-Lab Hub Educacional",
     description="API arquitetada com Clean Architecture e integração com Gemini IA.",
-    version="2.0.0", # Subimos a versão para marcar a refatoração!
+    version="2.0.0",
 )
 
-# --- REGISTRO DOS ROTEADORES (CONTROLLERS) ---
-app.include_router(material_controller.router)
-app.include_router(ai_controller.router)
+# Registro centralizado dos roteadores
+app.include_router(material_router)
+app.include_router(ai_router)
 
-# --- ENDPOINT DE OBSERVABILIDADE ---
 @app.get("/health", tags=["Observabilidade"])
 def health_check():
-    """Retorna o status de saúde da API."""
-    return {"status": "ok", "message": "API rodando com Clean Architecture!", "environment": "development"}
+    """Endpoint de verificação de integridade do sistema."""
+    return {
+        "status": "ok", 
+        "message": "API rodando com Clean Architecture!", 
+        "environment": "development"
+    }
