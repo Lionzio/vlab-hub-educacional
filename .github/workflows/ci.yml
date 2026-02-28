@@ -1,0 +1,19 @@
+name: CI - Quality Check
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Linting Tools
+        run: pip install flake8 black
+      - name: Run Black (Formatter Check)
+        run: black --check backend/app
+      - name: Run Flake8 (Syntax Check)
+        run: flake8 backend/app --ignore=E501,F401
