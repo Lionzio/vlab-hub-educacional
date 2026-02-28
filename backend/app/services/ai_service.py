@@ -44,11 +44,14 @@ def generate_smart_assist(title: str, resource_type: str) -> dict:
         elif "```" in text:
             text = text.split("```")[1].split("```")[0]
 
-            return json.loads(text.strip())
+        return json.loads(text.strip())
 
     except Exception as e:
         logger.error(f"Erro na geração de IA: {e}")
         return {
-            "description": f"Este recurso de {resource_type} aborda o tema '{title}' de forma didática.",
+            "description": (
+                f"Este recurso de {resource_type} aborda o tema "
+                f"'{title}' de forma didática."
+            ),
             "tags": f"{resource_type}, educação, estudo",
         }
