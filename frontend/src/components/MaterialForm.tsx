@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Input, TextArea } from './ui/Input';
+import { Select } from './ui/Select';
+// Correção Sênior: Usando 'import type' para que o Vite saiba que isso não é código JavaScript executável
+import type { Material } from '../types';
 
 interface MaterialFormProps {
-  onSave: (material: any) => Promise<boolean>;
+  onSave: (material: Material) => Promise<boolean>;
   onSmartAssist: (title: string, type: string) => Promise<any>;
   isLoading: boolean;
 }
@@ -36,28 +41,26 @@ export default function MaterialForm({ onSave, onSmartAssist, isLoading }: Mater
 
   return (
     <section style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '40px' }}>
-      <h2 style={{ marginBottom: '20px', fontSize: '1.2rem' }}>Cadastrar Novo Material</h2>
+      <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', color: '#111827' }}>Cadastrar Novo Material</h2>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input placeholder="Título (ex: Revolução Industrial)" value={title} onChange={(e) => setTitle(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db' }} />
+        <Input placeholder="Título (ex: Revolução Industrial)" value={title} onChange={(e) => setTitle(e.target.value)} />
         
-        <select value={type} onChange={(e) => setType(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db' }}>
-          <option>Vídeo</option><option>PDF</option><option>Artigo</option><option>Link Externo</option>
-        </select>
-
-        <input placeholder="URL do Material (ex: https://youtube.com/...)" value={url} onChange={(e) => setUrl(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db' }} />
-
-        <button onClick={handleSmartAssistClick} disabled={isLoading} style={{ background: '#4f46e5', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', justifyContent: 'center', gap: '8px' }}>
-          {isLoading ? 'Consultando IA...' : <><Sparkles size={18} /> Preencher com Smart Assist</>}
-        </button>
-
-        <textarea placeholder="Descrição (Gerada pela IA ou manual)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db' }} />
+        <Select options={['Vídeo', 'PDF', 'Artigo', 'Link Externo']} value={type} onChange={(e) => setType(e.target.value)} />
         
-        <input placeholder="Tags (separadas por vírgula)" value={tags} onChange={(e) => setTags(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db' }} />
+        <Input placeholder="URL do Material (ex: https://...)" value={url} onChange={(e) => setUrl(e.target.value)} />
+
+        <Button onClick={handleSmartAssistClick} isLoading={isLoading} variant="primary">
+          <Sparkles size={18} /> Preencher com Smart Assist
+        </Button>
+
+        <TextArea placeholder="Descrição (Gerada pela IA ou manual)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
         
-        <button onClick={handleSaveClick} style={{ background: '#10b981', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
+        <Input placeholder="Tags (separadas por vírgula)" value={tags} onChange={(e) => setTags(e.target.value)} />
+        
+        <Button onClick={handleSaveClick} variant="success">
           Salvar Material
-        </button>
+        </Button>
       </div>
     </section>
   );
