@@ -1,21 +1,23 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Configuração simples do SQLite para começarmos rapidamente
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+# URL do banco injetada via variável de ambiente (Docker) ou fallback para SQLite (Local)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-# O connect_args={"check_same_thread": False} é necessário apenas para SQLite no FastAPI
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Proteção Sênior: O SQLite exige check_same_thread=False, mas o Postgres não aceita esse argumento.
+# Criamos uma lógica condicional para que a aplicação não quebre dependendo do ambiente.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+# Inicializa a engine de conexão
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base para criarmos nossos modelos
 Base = declarative_base()
 
-# Dependência para injetar a sessão do banco nas rotas
 def get_db():
+    """Dependência para gerar e fechar a sessão do banco por cada requisição."""
     db = SessionLocal()
     try:
         yield db

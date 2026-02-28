@@ -1,19 +1,27 @@
-name: CI - Quality Check
+name: CI Quality Check
 
 on: [push, pull_request]
 
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-      - name: Install Linting Tools
-        run: pip install flake8 black
-      - name: Run Black (Formatter Check)
-        run: black --check backend/app
-      - name: Run Flake8 (Syntax Check)
-        run: flake8 backend/app --ignore=E501,F401
+          python-version: "3.11"
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          cd backend && pipenv install --dev
+          
+      - name: Run Black (Formatter)
+        run: cd backend && pipenv run black --check app
+        
+      - name: Run Flake8 (Linter)
+        # Ignoramos E501 (tamanho de linha) para não brigar com o Black
+        run: cd backend && pipenv run flake8 app --ignore=E501,W503
