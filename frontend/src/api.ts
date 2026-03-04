@@ -1,14 +1,16 @@
 import axios from 'axios';
 
 // ---------------------------------------------------------
-// Configuração Dinâmica da Base URL
+// Configuração Dinâmica e Segura da Base URL
 // ---------------------------------------------------------
-// No ambiente local (dev), o VITE_API_URL estará vazio, então ele usa '/api'
-// e o nosso proxy configurado no vite.config.ts faz o redirecionamento.
-// Na nuvem (Vercel), nós cadastraremos a variável VITE_API_URL apontando
-// para a URL real do Render (ex: https://vlab-backend.onrender.com).
 const api = axios.create({
+  // Tenta ler a URL da API da nuvem. Se não existir (local), usa o '/api' do Vite
   baseURL: import.meta.env.VITE_API_URL || '/api',
+  
+  // Blindagem Arquitetural: Timeout de 15 segundos.
+  // Evita que a interface congele (loading infinito) se o backend 
+  // ou a IA demorarem a responder devido a instabilidades de rede.
+  timeout: 15000, 
 });
 
 // ---------------------------------------------------------

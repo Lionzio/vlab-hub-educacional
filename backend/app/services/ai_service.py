@@ -1,53 +1,54 @@
 import json
 import logging
 from google import genai
-from app.core import settings
+from google.genai import types  # Importamos a tipagem de configurações do SDK
+from app.core.config import settings
 
+# Instancia o cliente da IA globalmente para reuso de conexão e performance
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 logger = logging.getLogger("VoxarHub")
 
 
 def generate_smart_assist(title: str, resource_type: str) -> dict:
     """
-    Consulta o Google Gemini usando o SDK oficial (google-genai)
-    para gerar metadados educacionais (descrição e tags).
+    Consulta o Google Gemini para gerar metadados educacionais.
+    Utiliza configurações estritas (JSON Mode) para evitar alucinações e erros de parse.
     """
     prompt = f"""
     Atue como um Assistente Pedagógico especialista em materiais didáticos.
-    Analise o seguinte recurso e gere metadados para alunos:
+    Gere metadados em JSON para o seguinte recurso:
 
     - Título: {title}
     - Tipo: {resource_type}
 
-    Regras de resposta:
-    1. A 'description' deve ter 2 frases com tom educativo e engajador.
-    2. As 'tags' devem ser 3 palavras-chave separadas por vírgula.
-    3. Responda estritamente com um objeto JSON puro.
-
-    Formato:
-    {{
-        "description": "sua descrição aqui",
-        "tags": "tag1, tag2, tag3"
-    }}
+    Regras obrigatórias:
+    1. A propriedade 'description' deve ter no máximo 2 frases, com tom educativo e engajador.
+    2. A propriedade 'tags' deve ser uma única string contendo 3 palavras-chave separadas por vírgula.
     """
 
     try:
+        # Configuração Sênior: Força a API do Google a não usar Markdown
+        # e responder EXCLUSIVAMENTE em formato de máquina (JSON puro).
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.7,  # Temperaturas menores reduzem a criatividade excessiva (alucinações)
+        )
+
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt,
+            config=config,
         )
 
-        text = response.text
-
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0]
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0]
-
-        return json.loads(text.strip())
+        # Como forçamos o mimetype, não precisamos mais usar o `.split()`!
+        return json.loads(response.text.strip())
 
     except Exception as e:
-        logger.error(f"Erro na geração de IA: {e}")
+        logger.error(f"[AI Service Critical] Falha na comunicação com Gemini: {e}")
+        
+        # Degradação Suave (Graceful Degradation):
+        # Se a nuvem cair, der timeout ou limite de cota, retornamos um dado padronizado
+        # estático para que o usuário não trave e consiga continuar o cadastro.
         return {
             "description": (
                 f"Este recurso de {resource_type} aborda o tema "
