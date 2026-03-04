@@ -17,10 +17,22 @@ export interface PaginatedMaterialResponse {
   total_pages: number;
 }
 
-// Novo Contrato Sênior: Tipagem estrita para as métricas agregadas do Dashboard
+// Contrato Sênior: Tipagem estrita para as métricas agregadas do Dashboard
 export interface DashboardMetrics {
   total_materials: number;
   video_count: number;
   pdf_count: number;
   link_count: number;
+}
+
+// Novos Contratos de Autenticação Sênior (JWT e RBAC)
+export interface User {
+  email: string;
+  role: 'aluno' | 'conteudista';
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  role: 'aluno' | 'conteudista';
 }
