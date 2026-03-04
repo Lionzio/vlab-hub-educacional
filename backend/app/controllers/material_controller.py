@@ -34,7 +34,9 @@ def list_materials(
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(5, ge=1, le=100, description="Itens por página"),
     search: str = Query(None, description="Termo de busca (Título ou Tag)"),
-    type: str = Query(None, description="Filtro por tipo de recurso (Vídeo, PDF, Link)"),
+    type: str = Query(
+        None, description="Filtro por tipo de recurso (Vídeo, PDF, Link)"
+    ),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
