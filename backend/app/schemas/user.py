@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class UserCreate(BaseModel):
@@ -12,8 +12,8 @@ class UserResponse(BaseModel):
     email: str
     role: str
 
-    class Config:
-        from_attributes = True
+    # 🛡️ Correção Sênior: Sintaxe nativa do Pydantic V2 para converter objetos do Banco (ORM) para JSON
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):

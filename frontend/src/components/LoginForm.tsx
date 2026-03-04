@@ -16,37 +16,33 @@ export function LoginForm() {
     setLoading(true);
     try {
       if (isRegistering) {
-        // Passo 1: Registra o usuário no banco
         await authApi.register({ email, password, role });
-        
-        // Passo 2: UX de Excelência (Auto-Login)
-        // Faz o login logo em seguida para o usuário não ter que digitar a senha de novo.
         const { data } = await authApi.login(email, password);
         login(data.access_token, email, data.role);
       } else {
-        // Fluxo normal de login
         const { data } = await authApi.login(email, password);
         login(data.access_token, email, data.role);
       }
     } catch (error: any) {
-      // Captura e exibe o erro exato devolvido pelo FastAPI
+      // 🛡️ Debug Sênior: Imprime o erro real no console (F12) para não ficarmos no escuro
+      console.error("[Auth Error Trace]:", error);
+      
       const backendError = error.response?.data?.detail;
       
-      // Se for um array, significa que o schema do Pydantic bloqueou a validação
       if (Array.isArray(backendError)) {
         alert("Por favor, preencha todos os campos corretamente.");
+      } else if (backendError) {
+        alert(backendError); // Mostra o erro exato ("Senha incorreta", etc)
       } else {
-        alert(backendError || "Erro de conexão. Verifique seus dados.");
+        alert("Erro 500: O servidor falhou ao processar a requisição. Olhe o terminal do Backend!");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Função isolada para evitar submissões de formulário acidentais
   const toggleMode = () => {
     setIsRegistering(!isRegistering);
-    // Limpa os campos ao trocar de modo para evitar confusão de estado
     setEmail('');
     setPassword('');
   };
@@ -102,7 +98,7 @@ export function LoginForm() {
         </form>
 
         <button 
-          type="button" /* 🛡️ FUNDAMENTAL: Evita que o React dispare o Submit do Form! */
+          type="button" 
           onClick={toggleMode} 
           style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', width: '100%', marginTop: '20px', cursor: 'pointer', textDecoration: 'underline' }}
         >
