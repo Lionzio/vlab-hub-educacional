@@ -1,21 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { materialApi } from '../api';
+import toast from 'react-hot-toast'; // <-- Import Sênior
 import type { Material, DashboardMetrics } from '../types';
 
 export function useMaterials() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // Novo Estado Global de Dashboard
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-
-  // Estados de Controle da Paginação e Filtros
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('');
 
-  // Busca os materiais paginados
   const fetchMaterials = useCallback(async (page: number = 1, search: string = searchQuery, type: string = filterType) => {
     try {
       const { data } = await materialApi.list(page, 5, search, type);
@@ -27,7 +24,6 @@ export function useMaterials() {
     }
   }, [searchQuery, filterType]);
 
-  // Função Sênior para buscar as métricas do banco de forma separada
   const fetchMetrics = useCallback(async () => {
     try {
       const { data } = await materialApi.getMetrics();
@@ -37,10 +33,9 @@ export function useMaterials() {
     }
   }, []);
 
-  // Monitora inicialização e mudanças de página para buscar os dados
   useEffect(() => { 
     fetchMaterials(currentPage); 
-    fetchMetrics(); // Busca as métricas logo que a aplicação carrega
+    fetchMetrics(); 
   }, [fetchMaterials, fetchMetrics, currentPage]);
 
   const applyFilters = (search: string, type: string) => {
@@ -51,19 +46,22 @@ export function useMaterials() {
   };
 
   const saveMaterial = async (materialData: Material) => {
+    const toastId = toast.loading("Salvando recurso...");
     try {
       await materialApi.create(materialData);
-      applyFilters('', ''); // Reseta a busca para garantir que o novo material apareça
-      await fetchMetrics(); // Atualiza o dashboard para somar o novo cadastro
+      applyFilters('', ''); 
+      await fetchMetrics(); 
+      toast.success("Material cadastrado com sucesso!", { id: toastId });
       return true;
     } catch (error) {
       console.error("[Backend Error] Falha ao salvar material:", error);
-      alert("Ocorreu um erro ao salvar o material.");
+      toast.error("Ocorreu um erro ao salvar o material.", { id: toastId });
       return false;
     }
   };
 
   const deleteMaterial = async (id: number) => {
+    const toastId = toast.loading("Deletando recurso...");
     try {
       await materialApi.delete(id);
       if (materials.length === 1 && currentPage > 1) {
@@ -71,21 +69,29 @@ export function useMaterials() {
       } else {
         await fetchMaterials(currentPage); 
       }
-      await fetchMetrics(); // Atualiza o dashboard para subtrair o cadastro deletado
+      await fetchMetrics(); 
+      toast.success("Material excluído permanentemente.", { id: toastId });
       return true;
     } catch (error) {
       console.error("[Backend Error] Falha ao deletar material:", error);
+      toast.error("Falha ao excluir o recurso.", { id: toastId });
       return false;
     }
   };
 
   const getSmartAssist = async (title: string, type: string) => {
     setLoading(true);
+    const toastId = toast.loading("Assistente de IA analisando...");
     try {
       const { data } = await materialApi.smartAssist(title, type);
+      toast.success("Metadados gerados pela IA!", { id: toastId });
       return data;
     } catch (error: any) {
-      if (error.code === 'ECONNABORTED') alert("A IA demorou muito para responder.");
+      if (error.code === 'ECONNABORTED') {
+        toast.error("A IA demorou muito para responder.", { id: toastId });
+      } else {
+        toast.error("Falha na comunicação com a IA.", { id: toastId });
+      }
       return null;
     } finally {
       setLoading(false);

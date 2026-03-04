@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api';
 import { BookOpen } from 'lucide-react';
+import toast from 'react-hot-toast'; // <-- Import Sênior
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -14,27 +15,31 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    // Feedback visual imediato para o usuário
+    const toastId = toast.loading("Autenticando...");
+
     try {
       if (isRegistering) {
         await authApi.register({ email, password, role });
+        toast.success("Conta criada! Redirecionando...", { id: toastId });
         const { data } = await authApi.login(email, password);
         login(data.access_token, email, data.role);
       } else {
         const { data } = await authApi.login(email, password);
+        toast.success("Login efetuado com sucesso!", { id: toastId });
         login(data.access_token, email, data.role);
       }
     } catch (error: any) {
-      // 🛡️ Debug Sênior: Imprime o erro real no console (F12) para não ficarmos no escuro
       console.error("[Auth Error Trace]:", error);
-      
       const backendError = error.response?.data?.detail;
       
       if (Array.isArray(backendError)) {
-        alert("Por favor, preencha todos os campos corretamente.");
+        toast.error("Preencha todos os campos corretamente.", { id: toastId });
       } else if (backendError) {
-        alert(backendError); // Mostra o erro exato ("Senha incorreta", etc)
+        toast.error(backendError, { id: toastId });
       } else {
-        alert("Erro 500: O servidor falhou ao processar a requisição. Olhe o terminal do Backend!");
+        toast.error("Erro no servidor. Tente novamente mais tarde.", { id: toastId });
       }
     } finally {
       setLoading(false);

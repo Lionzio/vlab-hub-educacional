@@ -1,4 +1,5 @@
 import { BookOpen, Moon, Sun, LogOut } from 'lucide-react';
+import { Toaster } from 'react-hot-toast'; // <-- Import Sênior
 import { useMaterials } from './hooks/useMaterials';
 import { useTheme } from './hooks/useTheme';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -8,7 +9,6 @@ import MaterialList from './components/MaterialList';
 import { MaterialFilter } from './components/MaterialFilter';
 import { Dashboard } from './components/Dashboard';
 
-// O conteúdo real do App, isolado para poder usar o Hook useAuth
 function AppContent() {
   const { user, logout, isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -18,13 +18,28 @@ function AppContent() {
     setCurrentPage, saveMaterial, deleteMaterial, getSmartAssist, applyFilters
   } = useMaterials();
 
-  // 🛡️ Guarda-Costas Frontend: Se não tem token, exibe a tela de Login!
   if (!isAuthenticated) {
-    return <LoginForm />;
+    return (
+      <>
+        {/* O Toaster precisa estar acessível mesmo na tela de Login */}
+        <Toaster position="top-right" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' } }} />
+        <LoginForm />
+      </>
+    );
   }
 
   return (
     <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', minHeight: '100vh' }}>
+      
+      {/* 🛡️ Componente Global de Notificações */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{ 
+          style: { background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' },
+          success: { iconTheme: { primary: 'var(--accent)', secondary: 'white' } }
+        }} 
+      />
+
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <BookOpen size={32} color="var(--accent)" />
@@ -46,7 +61,6 @@ function AppContent() {
 
       <Dashboard metrics={metrics} />
 
-      {/* RBAC: O formulário de cadastro SÓ APARECE para os conteudistas */}
       {user?.role === 'conteudista' && (
         <MaterialForm onSave={saveMaterial} onSmartAssist={getSmartAssist} isLoading={loading} />
       )}
@@ -65,7 +79,6 @@ function AppContent() {
   );
 }
 
-// O App raiz apenas envelopa a aplicação com o Provedor de Autenticação Global
 export default function App() {
   return (
     <AuthProvider>
