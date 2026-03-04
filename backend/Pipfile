@@ -4,18 +4,24 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+python-dotenv = "==1.0.0"
 fastapi = "*"
 uvicorn = "*"
+sqlalchemy = "*"
+pydantic = "*"
+pydantic-settings = "*"
+psycopg2-binary = "*"
+google-generativeai = "*"
+pyjwt = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
-bcrypt = "4.0.1"
-python-jose = {extras = ["cryptography"], version = "*"}
-google-generativeai = "*"  # Essencial para o Smart Assist
 python-multipart = "*"
+bcrypt = "<4.0.0"
 
 [dev-packages]
-pytest = "*"
 black = "*"
+flake8 = "*"
 httpx = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.11"
