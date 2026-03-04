@@ -1,7 +1,9 @@
 import json
 import logging
+
 from google import genai
-from google.genai import types  # Importamos a tipagem de configurações do SDK
+from google.genai import types
+
 from app.core.config import settings
 
 # Instancia o cliente da IA globalmente para reuso de conexão e performance
@@ -31,7 +33,7 @@ def generate_smart_assist(title: str, resource_type: str) -> dict:
         # e responder EXCLUSIVAMENTE em formato de máquina (JSON puro).
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
-            temperature=0.7,  # Temperaturas menores reduzem a criatividade excessiva (alucinações)
+            temperature=0.7,
         )
 
         response = client.models.generate_content(
@@ -45,7 +47,7 @@ def generate_smart_assist(title: str, resource_type: str) -> dict:
 
     except Exception as e:
         logger.error(f"[AI Service Critical] Falha na comunicação com Gemini: {e}")
-        
+
         # Degradação Suave (Graceful Degradation):
         # Se a nuvem cair, der timeout ou limite de cota, retornamos um dado padronizado
         # estático para que o usuário não trave e consiga continuar o cadastro.
