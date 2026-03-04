@@ -16,8 +16,13 @@ class MaterialRepository:
         self.db.refresh(db_material)
         return db_material
 
-    def get_all(self, skip: int = 0, limit: int = 10) -> list[EducationalMaterialModel]:
-        return self.db.query(EducationalMaterialModel).offset(skip).limit(limit).all()
+    def get_paginated(
+        self, skip: int = 0, limit: int = 10
+    ) -> tuple[list[EducationalMaterialModel], int]:
+        """Busca os itens paginados e a contagem total de forma eficiente."""
+        total = self.db.query(EducationalMaterialModel).count()
+        items = self.db.query(EducationalMaterialModel).offset(skip).limit(limit).all()
+        return items, total
 
     def get_by_id(self, material_id: int) -> EducationalMaterialModel | None:
         return (

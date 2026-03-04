@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
+from typing import Optional, List
 
 
 class MaterialBase(BaseModel):
@@ -28,6 +28,14 @@ class MaterialResponse(MaterialBase):
     """Schema usado para retornar os dados do banco para o Frontend."""
 
     id: int
-
-    # Boa prática Pydantic V2: Substitui a antiga 'class Config' pelo ConfigDict
     model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedMaterialResponse(BaseModel):
+    """Schema Sênior: Estrutura rigorosa para paginação."""
+
+    items: List[MaterialResponse]
+    total: int
+    page: int
+    size: int
+    total_pages: int

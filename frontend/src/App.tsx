@@ -4,8 +4,11 @@ import MaterialForm from './components/MaterialForm';
 import MaterialList from './components/MaterialList';
 
 function App() {
-  // Toda a lógica complexa foi abstraída para dentro do nosso Custom Hook!
-  const { materials, loading, saveMaterial, getSmartAssist } = useMaterials();
+  // O App não sabe de onde vêm os dados, ele só consome o Hook (Inversão de Controle)
+  const { 
+    materials, loading, currentPage, totalPages, 
+    setCurrentPage, saveMaterial, deleteMaterial, getSmartAssist 
+  } = useMaterials();
 
   return (
     <div style={{ padding: '40px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
@@ -14,15 +17,21 @@ function App() {
         <h1 style={{ color: '#111827' }}>V-Lab Hub Educacional</h1>
       </header>
 
-      {/* Injetamos as funções e o estado via Props */}
+      {/* Injeção de dependências no Formulário */}
       <MaterialForm 
         onSave={saveMaterial} 
         onSmartAssist={getSmartAssist} 
         isLoading={loading} 
       />
 
-      {/* Injetamos apenas os dados da lista */}
-      <MaterialList materials={materials} />
+      {/* Injeção de dependências na Lista Paginada */}
+      <MaterialList 
+        materials={materials} 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onDelete={deleteMaterial}
+      />
     </div>
   );
 }

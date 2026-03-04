@@ -1,31 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { materialApi } from '../api';
 import type { Material } from '../types';
 
 export function useMaterials() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Estados de Controle da Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Função para buscar a lista do banco
-  const fetchMaterials = async () => {
+  // useCallback: Impede recriação infinita da função a cada renderização do React
+  const fetchMaterials = useCallback(async (page: number = 1) => {
     try {
-      const { data } = await materialApi.list();
-      setMaterials(data);
+      const { data } = await materialApi.list(page, 5); // Buscando 5 itens por vez
+      setMaterials(data.items);
+      setCurrentPage(data.page);
+      setTotalPages(data.total_pages);
     } catch (error) {
       console.error("[Backend Error] Falha ao buscar materiais:", error);
     }
-  };
-
-  // Carrega os dados quando a aplicação inicia
-  useEffect(() => { 
-    fetchMaterials(); 
   }, []);
 
-  // Função para salvar no banco
+  // Monitora a página atual e refaz a busca sempre que ela mudar
+  useEffect(() => { 
+    fetchMaterials(currentPage); 
+  }, [fetchMaterials, currentPage]);
+
   const saveMaterial = async (materialData: Material) => {
     try {
       await materialApi.create(materialData);
-      await fetchMaterials(); // Atualiza a lista após salvar
+      // UX Avançada: Ao salvar um item novo, força a interface a voltar para a página 1
+      await fetchMaterials(1); 
       return true;
     } catch (error) {
       console.error("[Backend Error] Falha ao salvar material:", error);
@@ -34,25 +40,52 @@ export function useMaterials() {
     }
   };
 
-  // Função para chamar o Gemini com tratamento rigoroso de erros e timeout
+  const deleteMaterial = async (id: number) => {
+    try {
+      await materialApi.delete(id);
+      
+      // UX Avançada: Se o usuário apagar o último item da página atual, 
+      // ele recua uma página automaticamente para não ver uma tela em branco.
+      if (materials.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      } else {
+        await fetchMaterials(currentPage); 
+      }
+      return true;
+    } catch (error) {
+      console.error("[Backend Error] Falha ao deletar material:", error);
+      alert("Ocorreu um erro ao deletar o material.");
+      return false;
+    }
+  };
+
   const getSmartAssist = async (title: string, type: string) => {
     setLoading(true);
     try {
       const { data } = await materialApi.smartAssist(title, type);
-      return data; // Retorna o JSON com { description, tags }
+      return data;
     } catch (error: any) {
-      // Programação Defensiva: Identifica se a falha foi por tempo excedido (Timeout)
+      // Defesa contra o Timeout configurado no api.ts
       if (error.code === 'ECONNABORTED') {
         alert("A Inteligência Artificial demorou muito para responder. Tente novamente.");
       } else {
-        alert("Erro ao contatar o Assistente Inteligente. Tente novamente mais tarde.");
+        alert("Erro ao contatar o Assistente Inteligente.");
       }
-      console.error("[AI Error]:", error);
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  return { materials, loading, saveMaterial, getSmartAssist };
+  // Retorna a "API Interna" do Hook para os componentes
+  return { 
+    materials, 
+    loading, 
+    currentPage, 
+    totalPages, 
+    setCurrentPage, 
+    saveMaterial, 
+    deleteMaterial, 
+    getSmartAssist 
+  };
 }
