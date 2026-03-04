@@ -12,11 +12,19 @@ from app.schemas.material import (
 )
 from app.repositories.material_repository import MaterialRepository
 
+# Imports de Segurança Sênior (RBAC)
+from app.core.security import get_current_user, require_conteudista
+
 router = APIRouter(prefix="/materials", tags=["Materials"])
 
 
 @router.post("/", response_model=MaterialResponse, status_code=status.HTTP_201_CREATED)
-def create_material(material: MaterialCreate, db: Session = Depends(get_db)):
+def create_material(
+    material: MaterialCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_conteudista),
+):
+    """Cria um recurso. Rota protegida: Apenas Conteudistas/Professores."""
     repo = MaterialRepository(db)
     return repo.create(material)
 
@@ -26,14 +34,11 @@ def list_materials(
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(5, ge=1, le=100, description="Itens por página"),
     search: str = Query(None, description="Termo de busca (Título ou Tag)"),
-    type: str = Query(
-        None, description="Filtro por tipo de recurso (Vídeo, PDF, Link)"
-    ),
+    type: str = Query(None, description="Filtro por tipo de recurso (Vídeo, PDF, Link)"),
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    """
-    Lista os materiais de forma paginada e com suporte a filtros dinâmicos.
-    """
+    """Lista materiais paginados. Rota protegida: Requer usuário autenticado."""
     repo = MaterialRepository(db)
     skip = (page - 1) * size
 
@@ -47,16 +52,24 @@ def list_materials(
     )
 
 
-# 🚀 NOVA ROTA: Dashboard (DEVE ficar antes da rota de ID para evitar conflitos de path)
+# 🚀 ROTA: Dashboard (Sempre antes do /{material_id})
 @router.get("/metrics", response_model=DashboardMetricsResponse)
-def get_dashboard_metrics(db: Session = Depends(get_db)):
-    """Retorna as estatísticas consolidadas para o Dashboard do Frontend."""
+def get_dashboard_metrics(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Retorna estatísticas para o Dashboard. Rota protegida: Requer usuário autenticado."""
     repo = MaterialRepository(db)
     return repo.get_metrics()
 
 
 @router.get("/{material_id}", response_model=MaterialResponse)
-def get_material(material_id: int, db: Session = Depends(get_db)):
+def get_material(
+    material_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Busca um material por ID. Rota protegida: Requer usuário autenticado."""
     repo = MaterialRepository(db)
     db_material = repo.get_by_id(material_id)
     if not db_material:
@@ -66,8 +79,12 @@ def get_material(material_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{material_id}", response_model=MaterialResponse)
 def update_material(
-    material_id: int, material: MaterialUpdate, db: Session = Depends(get_db)
+    material_id: int,
+    material: MaterialUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_conteudista),
 ):
+    """Atualiza um recurso. Rota protegida: Apenas Conteudistas/Professores."""
     repo = MaterialRepository(db)
     db_material = repo.get_by_id(material_id)
     if not db_material:
@@ -76,7 +93,12 @@ def update_material(
 
 
 @router.delete("/{material_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_material(material_id: int, db: Session = Depends(get_db)):
+def delete_material(
+    material_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_conteudista),
+):
+    """Deleta um recurso. Rota protegida: Apenas Conteudistas/Professores."""
     repo = MaterialRepository(db)
     db_material = repo.get_by_id(material_id)
     if not db_material:
