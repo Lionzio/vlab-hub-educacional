@@ -8,12 +8,10 @@ RUN pip install pipenv
 # Copia os arquivos de configuração de dependências
 COPY Pipfile Pipfile.lock ./
 
-# Instala as dependências diretamentes no sistema do container
-RUN pipenv install --system --deploy
-
-# Copia todo o código fonte para dentro do container
+# CORREÇÃO: Adicionado --dev para ter pytest/black e --deploy para segurança
+RUN pipenv install --system --dev
+# Copia todo o código fonte
 COPY . .
 
-# Comando obrigatório para Nuvem: Inicia o servidor FastAPI usando a porta dinâmica
-# (Se a variável PORT não for definida, ele usa a 8000 como padrão)
+# Comando padrão (será sobrescrito pelo compose em dev, mas mantemos para nuvem)
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
