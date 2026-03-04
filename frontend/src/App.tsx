@@ -2,12 +2,12 @@ import { BookOpen } from 'lucide-react';
 import { useMaterials } from './hooks/useMaterials';
 import MaterialForm from './components/MaterialForm';
 import MaterialList from './components/MaterialList';
+import { MaterialFilter } from './components/MaterialFilter';
 
 function App() {
-  // O App não sabe de onde vêm os dados, ele só consome o Hook (Inversão de Controle)
   const { 
-    materials, loading, currentPage, totalPages, 
-    setCurrentPage, saveMaterial, deleteMaterial, getSmartAssist 
+    materials, loading, currentPage, totalPages, searchQuery, filterType,
+    setCurrentPage, saveMaterial, deleteMaterial, getSmartAssist, applyFilters
   } = useMaterials();
 
   return (
@@ -17,14 +17,19 @@ function App() {
         <h1 style={{ color: '#111827' }}>V-Lab Hub Educacional</h1>
       </header>
 
-      {/* Injeção de dependências no Formulário */}
       <MaterialForm 
         onSave={saveMaterial} 
         onSmartAssist={getSmartAssist} 
         isLoading={loading} 
       />
 
-      {/* Injeção de dependências na Lista Paginada */}
+      {/* Nossa Nova Barra de Busca Global */}
+      <MaterialFilter 
+        onApplyFilters={applyFilters} 
+        currentSearch={searchQuery}
+        currentType={filterType}
+      />
+
       <MaterialList 
         materials={materials} 
         currentPage={currentPage}

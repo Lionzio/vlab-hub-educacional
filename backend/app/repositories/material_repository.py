@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.models.material import EducationalMaterialModel
 from app.schemas.material import MaterialCreate, MaterialUpdate
 
@@ -17,11 +18,38 @@ class MaterialRepository:
         return db_material
 
     def get_paginated(
-        self, skip: int = 0, limit: int = 10
+        self,
+        skip: int = 0,
+        limit: int = 10,
+        search: str = None,
+        resource_type: str = None,
     ) -> tuple[list[EducationalMaterialModel], int]:
-        """Busca os itens paginados e a contagem total de forma eficiente."""
-        total = self.db.query(EducationalMaterialModel).count()
-        items = self.db.query(EducationalMaterialModel).offset(skip).limit(limit).all()
+        """
+        Busca itens paginados com suporte a filtros dinâmicos.
+        Utiliza programação defensiva para aplicar os filtros de forma incremental.
+        """
+        query = self.db.query(EducationalMaterialModel)
+
+        # Filtro de Busca Global (Título ou Tags) ignorando Case Sensitive (ilike)
+        if search:
+            search_format = f"%{search}%"
+            query = query.filter(
+                or_(
+                    EducationalMaterialModel.title.ilike(search_format),
+                    EducationalMaterialModel.tags.ilike(search_format),
+                )
+            )
+
+        # Filtro exato por tipo de recurso
+        if resource_type:
+            query = query.filter(
+                EducationalMaterialModel.resource_type == resource_type
+            )
+
+        # Conta o total APÓS aplicar os filtros, para a paginação não quebrar
+        total = query.count()
+        items = query.offset(skip).limit(limit).all()
+
         return items, total
 
     def get_by_id(self, material_id: int) -> EducationalMaterialModel | None:

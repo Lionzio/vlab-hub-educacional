@@ -2,7 +2,6 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
-# Imports otimizados focados apenas nos contratos e abstrações necessárias
 from app.core.database import get_db
 from app.schemas.material import (
     MaterialCreate,
@@ -25,13 +24,21 @@ def create_material(material: MaterialCreate, db: Session = Depends(get_db)):
 def list_materials(
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(5, ge=1, le=100, description="Itens por página"),
+    search: str = Query(None, description="Termo de busca (Título ou Tag)"),
+    type: str = Query(
+        None, description="Filtro por tipo de recurso (Vídeo, PDF, Link)"
+    ),
     db: Session = Depends(get_db),
 ):
-    """Lista os materiais de forma paginada para não sobrecarregar o frontend."""
+    """
+    Lista os materiais de forma paginada e com suporte a filtros dinâmicos.
+    """
     repo = MaterialRepository(db)
     skip = (page - 1) * size
 
-    items, total = repo.get_paginated(skip=skip, limit=size)
+    items, total = repo.get_paginated(
+        skip=skip, limit=size, search=search, resource_type=type
+    )
     total_pages = math.ceil(total / size) if total > 0 else 1
 
     return PaginatedMaterialResponse(
