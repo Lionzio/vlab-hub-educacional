@@ -1,4 +1,5 @@
-version: '3.8'
+# A declaração de 'version' foi removida para seguir a especificação moderna (Compose Spec)
+name: vlab-hub-educacional # Define um escopo de nomenclatura limpo para os seus contêineres
 
 services:
   db:
@@ -11,6 +12,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    # Blindagem Sênior (Healthcheck):
+    # Fica testando o banco a cada 5 segundos até ele estar 100% pronto para conexões.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voxar -d voxarhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -25,7 +33,10 @@ services:
       # O compose vai ler a chave do seu arquivo .env local
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
-      - db
+      db:
+        # Orquestração Perfeita: O backend só "nasce" depois que o banco passa no healthcheck
+        condition: service_healthy
 
 volumes:
   postgres_data:
+    # Garante que os dados do seu banco não sumam quando você desligar o Docker

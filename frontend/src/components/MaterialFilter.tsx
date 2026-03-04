@@ -7,7 +7,6 @@ interface MaterialFilterProps {
 }
 
 export function MaterialFilter({ onApplyFilters, currentSearch, currentType }: MaterialFilterProps) {
-  // Estado local para o formulário antes de enviar a busca
   const [localSearch, setLocalSearch] = useState(currentSearch);
   const [localType, setLocalType] = useState(currentType);
 
@@ -23,19 +22,19 @@ export function MaterialFilter({ onApplyFilters, currentSearch, currentType }: M
   };
 
   return (
-    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px', background: 'white', padding: '15px', borderRadius: '10px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px', background: 'var(--bg-card)', padding: '15px', borderRadius: '10px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'all 0.3s ease' }}>
       <input 
         type="text" 
         placeholder="Buscar por título ou tag..." 
         value={localSearch}
         onChange={(e) => setLocalSearch(e.target.value)}
-        style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+        style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)' }}
       />
       
       <select 
         value={localType}
         onChange={(e) => setLocalType(e.target.value)}
-        style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', background: 'white' }}
+        style={{ padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)' }}
       >
         <option value="">Todos os Tipos</option>
         <option value="Vídeo">Vídeo</option>
@@ -43,12 +42,12 @@ export function MaterialFilter({ onApplyFilters, currentSearch, currentType }: M
         <option value="Link">Link</option>
       </select>
 
-      <button type="submit" style={{ padding: '10px 15px', borderRadius: '6px', background: '#4f46e5', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+      <button type="submit" style={{ padding: '10px 15px', borderRadius: '6px', background: 'var(--accent)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
         Buscar
       </button>
 
       {(currentSearch || currentType) && (
-        <button type="button" onClick={handleClear} style={{ padding: '10px 15px', borderRadius: '6px', background: '#f3f4f6', color: '#4b5563', border: '1px solid #d1d5db', cursor: 'pointer' }}>
+        <button type="button" onClick={handleClear} style={{ padding: '10px 15px', borderRadius: '6px', background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
           Limpar
         </button>
       )}
