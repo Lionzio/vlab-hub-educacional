@@ -39,3 +39,12 @@ class PaginatedMaterialResponse(BaseModel):
     page: int
     size: int
     total_pages: int
+
+
+class DashboardMetricsResponse(BaseModel):
+    """Schema para o Dashboard de estatísticas."""
+
+    total_materials: int
+    video_count: int
+    pdf_count: int
+    link_count: int

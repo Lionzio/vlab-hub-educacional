@@ -1,5 +1,4 @@
-// Contrato base do recurso didático. 
-// O 'id' é opcional (?) porque na hora de criar, ele ainda não existe.
+// Contrato base do recurso didático.
 export interface Material {
   id?: number;
   title: string;
@@ -16,4 +15,12 @@ export interface PaginatedMaterialResponse {
   page: number;
   size: number;
   total_pages: number;
+}
+
+// Novo Contrato Sênior: Tipagem estrita para as métricas agregadas do Dashboard
+export interface DashboardMetrics {
+  total_materials: number;
+  video_count: number;
+  pdf_count: number;
+  link_count: number;
 }

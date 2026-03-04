@@ -52,6 +52,38 @@ class MaterialRepository:
 
         return items, total
 
+    def get_metrics(self) -> dict:
+        """
+        Calcula as estatísticas gerais do repositório educacional.
+        Realiza as contagens diretamente no motor do banco de dados para maior performance.
+        """
+        total = self.db.query(EducationalMaterialModel).count()
+
+        videos = (
+            self.db.query(EducationalMaterialModel)
+            .filter(EducationalMaterialModel.resource_type == "Vídeo")
+            .count()
+        )
+
+        pdfs = (
+            self.db.query(EducationalMaterialModel)
+            .filter(EducationalMaterialModel.resource_type == "PDF")
+            .count()
+        )
+
+        links = (
+            self.db.query(EducationalMaterialModel)
+            .filter(EducationalMaterialModel.resource_type == "Link")
+            .count()
+        )
+
+        return {
+            "total_materials": total,
+            "video_count": videos,
+            "pdf_count": pdfs,
+            "link_count": links,
+        }
+
     def get_by_id(self, material_id: int) -> EducationalMaterialModel | None:
         return (
             self.db.query(EducationalMaterialModel)

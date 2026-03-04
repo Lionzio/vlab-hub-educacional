@@ -8,6 +8,7 @@ from app.schemas.material import (
     MaterialUpdate,
     MaterialResponse,
     PaginatedMaterialResponse,
+    DashboardMetricsResponse,
 )
 from app.repositories.material_repository import MaterialRepository
 
@@ -44,6 +45,14 @@ def list_materials(
     return PaginatedMaterialResponse(
         items=items, total=total, page=page, size=size, total_pages=total_pages
     )
+
+
+# 🚀 NOVA ROTA: Dashboard (DEVE ficar antes da rota de ID para evitar conflitos de path)
+@router.get("/metrics", response_model=DashboardMetricsResponse)
+def get_dashboard_metrics(db: Session = Depends(get_db)):
+    """Retorna as estatísticas consolidadas para o Dashboard do Frontend."""
+    repo = MaterialRepository(db)
+    return repo.get_metrics()
 
 
 @router.get("/{material_id}", response_model=MaterialResponse)
