@@ -15,8 +15,16 @@ router = APIRouter(prefix="/auth", tags=["Autenticação"])
 )
 def register(user: UserCreate, db: Session = Depends(get_db)):
     repo = UserRepository(db)
-    if repo.get_by_email(user.email):
-        raise HTTPException(status_code=400, detail="Este e-mail já está em uso.")
+
+    # Higienização de Dados (Programação Defensiva Sênior)
+    # Remove espaços vazios acidentais e força letras minúsculas no banco.
+    clean_email = user.email.strip().lower()
+    user.email = clean_email
+
+    if repo.get_by_email(clean_email):
+        raise HTTPException(
+            status_code=400, detail="Este e-mail já está cadastrado. Faça login."
+        )
     return repo.create(user)
 
 
@@ -25,8 +33,10 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     repo = UserRepository(db)
-    # OAuth2 usa o campo 'username' nativamente, nós passamos o email para ele
-    user = repo.get_by_email(form_data.username)
+
+    # Higienização na hora de comparar o input do usuário com o banco
+    clean_email = form_data.username.strip().lower()
+    user = repo.get_by_email(clean_email)
 
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciais inválidas.")

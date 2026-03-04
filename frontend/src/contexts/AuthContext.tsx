@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('vlab-email');
     localStorage.removeItem('vlab-role');
     
-    // Força o reload da página para limpar cache de memória
+    // Força o reload da página para limpar cache de memória de forma agressiva
     window.location.reload(); 
   };
 
@@ -53,9 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook customizado para consumir o contexto facilmente
+// Hook customizado para consumir o contexto
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
   return context;
 };

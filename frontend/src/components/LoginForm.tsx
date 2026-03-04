@@ -16,18 +16,39 @@ export function LoginForm() {
     setLoading(true);
     try {
       if (isRegistering) {
+        // Passo 1: Registra o usuário no banco
         await authApi.register({ email, password, role });
-        alert("Conta criada com sucesso! Faça o login agora.");
-        setIsRegistering(false); // Volta para a tela de login
+        
+        // Passo 2: UX de Excelência (Auto-Login)
+        // Faz o login logo em seguida para o usuário não ter que digitar a senha de novo.
+        const { data } = await authApi.login(email, password);
+        login(data.access_token, email, data.role);
       } else {
+        // Fluxo normal de login
         const { data } = await authApi.login(email, password);
         login(data.access_token, email, data.role);
       }
     } catch (error: any) {
-      alert(error.response?.data?.detail || "Erro de autenticação. Verifique seus dados.");
+      // Captura e exibe o erro exato devolvido pelo FastAPI
+      const backendError = error.response?.data?.detail;
+      
+      // Se for um array, significa que o schema do Pydantic bloqueou a validação
+      if (Array.isArray(backendError)) {
+        alert("Por favor, preencha todos os campos corretamente.");
+      } else {
+        alert(backendError || "Erro de conexão. Verifique seus dados.");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função isolada para evitar submissões de formulário acidentais
+  const toggleMode = () => {
+    setIsRegistering(!isRegistering);
+    // Limpa os campos ao trocar de modo para evitar confusão de estado
+    setEmail('');
+    setPassword('');
   };
 
   return (
@@ -81,7 +102,8 @@ export function LoginForm() {
         </form>
 
         <button 
-          onClick={() => setIsRegistering(!isRegistering)} 
+          type="button" /* 🛡️ FUNDAMENTAL: Evita que o React dispare o Submit do Form! */
+          onClick={toggleMode} 
           style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', width: '100%', marginTop: '20px', cursor: 'pointer', textDecoration: 'underline' }}
         >
           {isRegistering ? 'Já tenho uma conta. Fazer Login.' : 'Não tem conta? Registre-se aqui.'}
